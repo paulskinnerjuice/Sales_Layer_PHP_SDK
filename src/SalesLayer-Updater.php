@@ -28,7 +28,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     public  $hostname        = null;
     public  $charset         = 'utf8';
 
-    public  $table_prefix    = 'slyr_';
+    public  $table_prefix    = 'pim_';
     public  $table_config    = '__api_config';
     public  $table_engine    = 'InnoDB';
 
@@ -1701,8 +1701,8 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             $s="\n\n[SLYR_Updater] List of SQL's:\n".print_r($this->SQL_list, 1)."\r\n";
 
-            if ($this->debbug=='file') { file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'_log_updater_'.date('Y-m-d_H-i').'.txt', $s, FILE_APPEND); }
-            else                       { echo $s; }
+            if ($this->debbug==='file') { file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'_log_updater_'.date('Y-m-d_H-i').'.txt', $s, FILE_APPEND); }
+            else                       { echo'<pre>'.$s.'</pre>'; }
 
             $this->SQL_list = array();
 
