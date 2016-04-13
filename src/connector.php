@@ -16,7 +16,7 @@ $dbpassword = DB_PASSWORD;
 
 $CONNS=array(
 
-    'CN1133H4648C607'=>'6919b2fd1b48ef9018ea1e1d272fed6b',
+    'CN1133H4648C607'=>'6919b2fd1b48ef9018ea1e1d272fed6b'
     //'__other_Sales_Layer_connector_code__'=>'__other_Sales_Layer_secret__'
 );
 
@@ -36,7 +36,7 @@ $CONNS=array(
 
     } else {
 
-        foreach ($CONNS as $codeConn => $secretKey) {
+        foreach($CONNS as $codeConn => $secretKey) {
 
             $connection->set_identification($codeConn, $secretKey);
 
@@ -130,9 +130,7 @@ $CONNS=array(
                             foreach($deleted_product_ids as $deleted_product_id) {
 
                                 $delete_type = 'product';
-                                $wc_id = $this->get_deleted_id($delete_type, $deleted_product_id);
-
-                                // Delete the product from Woocommerce
+                                $wc_id = $this->get_deleted_id_and_delete($delete_type, $deleted_product_id);
 
                                 echo $deleted_product_id.' - '.$wc_id.'<br/>';
                             }
@@ -147,9 +145,7 @@ $CONNS=array(
                             foreach($deleted_format_ids as $deleted_format_id) {
 
                                 $delete_type = 'format';
-                                $wc_id = $this->get_deleted_id($delete_type, $deleted_format_id);
-
-                                // Delete the product from Woocommerce
+                                $wc_id = $this->get_deleted_id_and_delete($delete_type, $deleted_format_id);
 
                                 echo $deleted_format_id.' - '.$wc_id.'<br/>';
                             }
@@ -168,15 +164,25 @@ $CONNS=array(
     }
 //}
 
-private function get_deleted_id($delete_type, $deleted_id) {
+function get_deleted_id_and_delete($delete_type, $deleted_id) {
 
     $db = new PDO('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4', DB_USER, DB_PASSWORD, array(PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 
-    if($delete_type == 'product')
-    // Search pim_wc_connection table for deleted_id and return the wc_id
+    $delete_id = $db->prepare('SELECT * FROM pim_wc_connection WHERE ? = ? LIMIT 1');
+
+    // Set the type of id to search for
+    if($delete_type == 'product'){$id_type = 'pim_id';}elseif($delete_type == 'format'){$id_type = 'pim_var_id';}
+
+    // Search for the WC version of the id depending on above, and put it into the wc_id variable
+    $delete_id->execute(array($id_type, $deleted_id));
+    $results = $delete_id->fetchAll(PDO::FETCH_ASSOC);
+    if($delete_type == 'product'){$wc_id = $results['wc_id'];}elseif($delete_type == 'format'){$wc_id = $results['wc_var_id'];}
 
     // Delete from the database
+    $delete_from_db = $db->prepare('DELETE FROM pim_wc_connection WHERE ? = ?');
+    $delete_from_db->execute(array($id_type, $deleted_id));
 
+    return $wc_id;
 }
 
 /*
