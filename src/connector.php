@@ -110,13 +110,13 @@ if ($connection->has_response_error()) {
                         }
                     }
 					
-					// Loop through the formats, add them to their product and add all the Woocommerce
+                    // Loop through the formats, add them to their product and add all the Woocommerce
                     if(isset($modified_formats)) {
-                        
+
                         $all_mod_formats = $modified_formats['modified'];
                         foreach($all_mod_formats as $individual_format) {
-
-							process_format($individual_format, $all_formatted_products);
+                            $new_formatted_products = process_format($individual_format, $all_formatted_products);
+                            $all_formatted_products = $new_formatted_products;
                         }
                     }
 
@@ -254,6 +254,8 @@ function process_format($individual_format, $all_formatted_products) {
 		// Loop through all the products and find the one that applies to this format                 
 		if($pim_id == $individual_format['products_id']) {
 
+            $key_to_change = $key;
+
             $get_wc_var_id =  $db->query('SELECT * FROM pim_wc_connection WHERE pim_var_id = '.$pim_var_id.' LIMIT 1');
             $result = $get_wc_var_id->fetch(PDO::FETCH_ASSOC);
             if(count($result) > 0) {
@@ -269,34 +271,34 @@ function process_format($individual_format, $all_formatted_products) {
             } else {
                 $format_count = 0;
             }
-
-            $all_formatted_products[$key] = format_format($individual_format, $all_formatted_products, $attr_count, $format_count);
+            $finished_format = format_format($individual_format, $formatted_product, $attr_count, $format_count);
 
 		}
 	}
+    // Update this product in the parent product with the new format to be returned below
+    $all_formatted_products[$key_to_change]['product'] = $finished_format['product'];
 
     // As with products, we want to check that the sku for the format we're creating hasn't been left in wp_postmeta - but only if this is a new format
     $check_pim_var = $db->query('SELECT * FROM pim_wc_connection WHERE pim_var_id = '.$pim_var_id);
     $row_count = $check_pim_var->rowCount();
     if($row_count == 0) {
 
-        $sku_id = $all_formatted_products[$key]['product']['variations'][$format_count]['sku'];
-        $check_wc_sku = $db->query('SELECT * FROM wp_postmeta WHERE meta_key = "_sku" AND meta_value = "' . $sku_id.'"');
+        $format_sku = $finished_format['product']['variations'][$format_count]['sku'];
+        $check_wc_sku = $db->query('SELECT * FROM wp_postmeta WHERE meta_key = "_sku" AND meta_value = "' . $format_sku.'"');
         $row_count = $check_wc_sku->rowCount();
 
         if ($row_count > 0) {
             $delete_sku = $db->prepare('DELETE FROM wp_postmeta WHERE meta_key = "_sku" AND meta_value = ? LIMIT 1');
-            $delete_sku->execute(array($sku_id));
+            $delete_sku->execute(array($format_sku));
         }
     }
 
     // Push this into woocommerce and return the id of the format
-    //echo'<pre>';var_dump($finished_product[0]);echo'</pre><br/><br/>';
-    $return_data = $woocommerce->put('products/'.$prod_wc_id, $all_formatted_products[$key]);
-    //echo'<pre>';var_dump($return_data);echo'</pre>';die;
+    $return_data = $woocommerce->put('products/'.$prod_wc_id, $finished_format);
 
-    // Set the wc var id
+    // Get the WC var id and set it within itself so it's not going to conflict in later iterations of this loop
     $wc_var_id = $return_data['product']['variations'][$format_count]['id'];
+    $all_formatted_products[$key_to_change]['product']['variations'][$format_count]['id'] = $wc_var_id;
     
     // Check if the var already exists in the db and, if not; add it
     $check_format = $db->query('SELECT * FROM pim_wc_connection WHERE pim_var_id = '.$pim_var_id.' LIMIT 1');
@@ -305,6 +307,9 @@ function process_format($individual_format, $all_formatted_products) {
         $create_format = $db->prepare('INSERT INTO pim_wc_connection(pim_id, pim_var_id, wc_id, wc_var_id) values(?,?,?,?)');
 	    $create_format->execute(array($prod_pim_id, $pim_var_id, $prod_wc_id, $wc_var_id));
 	}
+
+    // Return the formatted product so it can be used correctly in the next iteration of the loop
+    return $all_formatted_products;
     
 }
 
@@ -426,6 +431,9 @@ function format_product($individual_product){
 	$wc_product['product']['attributes'][2]['options'] = $individual_product['data']['led_canopy_lighting'];
 	$wc_product['product']['attributes'][3]['name'] = 'Manual Night Blinds';
 	$wc_product['product']['attributes'][3]['options'] = $individual_product['data']['manual_night_blinds'];
+    $wc_product['product']['attributes'][4]['name'] = 'Variations';
+    $wc_product['product']['attributes'][4]['variation'] = true;
+    $wc_product['product']['attributes'][4]['options'] = array();
 
 	return $wc_product;
 
@@ -434,22 +442,25 @@ function format_product($individual_product){
 
 function format_format($individual_format, $formatted_product, $attr_count, $format_count) {
 
-    $formatted_product[0]['product']['type'] = 'variable';
+    $woocommerce = new Client('http://dev/paul/mayfield-test/', 'ck_aa0ea0a3a409e8e5afdf433e1b85273d9417bb9e', 'cs_b6d19ff8becaabdad45758bc4da85d277ea605b5');
 
-	// Set the attribute for this format
-	$formatted_product[0]['product']['attributes'][$attr_count]['name'] = $individual_format['data']['format_reference'];
-    $formatted_product[0]['product']['attributes'][$attr_count]['options'] = $individual_format['data']['format_reference'];
-    $formatted_product[0]['product']['attributes'][$attr_count]['variation'] = true;
+	// Push the updated attributes into the product so they're ready to be created in the step below
+    $product_id = $formatted_product['product']['id'];
+    array_push($formatted_product['product']['attributes'][4]['options'], str_replace(' ', '_', $individual_format['data']['format_reference']));
+    $attr_to_wc = ['product' => ['attributes' => $formatted_product['product']['attributes']]];
+    $test = $woocommerce->put('products/'.$product_id, $attr_to_wc);
 
     // Set the format details
+    $formatted_product['product']['type'] = 'variable';
+
     if(isset($individual_format['wc_var_id'])){
-        $formatted_product[0]['product']['variations'][$format_count]['id'] = $individual_format['wc_var_id'];
+        $formatted_product['product']['variations'][$format_count]['id'] = $individual_format['wc_var_id'];
     }
 
-    $formatted_product[0]['product']['variations'][$format_count]['sku'] = $individual_format['data']['format_reference'];
+    $formatted_product['product']['variations'][$format_count]['sku'] = str_replace(' ', '_', $individual_format['data']['format_reference']);
 
-    $formatted_product[0]['product']['variations'][$format_count]['attributes'][0]['name'] = $individual_format['data']['format_reference'];;
-    $formatted_product[0]['product']['variations'][$format_count]['attributes'][0]['options'] = $individual_format['data']['format_reference'];
+    $formatted_product['product']['variations'][$format_count]['attributes'][0]['name'] = 'variations';
+    $formatted_product['product']['variations'][$format_count]['attributes'][0]['option'] = str_replace(' ', '_', $individual_format['data']['format_reference']);
 
     if(isset($individual_format['data']['dimensions']) && !empty($individual_format['data']['dimensions'])) {
         $downloads = $individual_format['data']['dimensions'];
@@ -458,10 +469,10 @@ function format_format($individual_format, $formatted_product, $attr_count, $for
 
         $file_path = $individual_format['data']['dimensions'][$download_id]['THM'];
 
-        $formatted_product[0]['product']['variations'][$format_count]['downloadable'] = true;
-        $formatted_product[0]['product']['variations'][$format_count]['downloads'][0]['id'] = $download_id;
-        $formatted_product[0]['product']['variations'][$format_count]['downloads'][0]['name'] = basename($file_path);
-        $formatted_product[0]['product']['variations'][$format_count]['downloads'][0]['file'] = $file_path;
+        $formatted_product['product']['variations'][$format_count]['downloadable'] = true;
+        $formatted_product['product']['variations'][$format_count]['downloads'][0]['id'] = $download_id;
+        $formatted_product['product']['variations'][$format_count]['downloads'][0]['name'] = basename($file_path);
+        $formatted_product['product']['variations'][$format_count]['downloads'][0]['file'] = $file_path;
     }
 
 	return $formatted_product;
