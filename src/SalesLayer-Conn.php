@@ -33,7 +33,7 @@ class SalesLayer_Conn {
     private $__codeConn                  = null;
     private $__secretKey                 = null;
 
-    private $__group_multicategory       = false;
+    private $__group_multicategory       = true;
 
     public  $data_returned               = null;
     public  $response_api_version        = null;
