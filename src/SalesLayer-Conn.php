@@ -28,12 +28,12 @@ class SalesLayer_Conn {
     public  $connect_API_version         = '1.17';
 
     public  $response_error              = 0;
-    public  $response_error_message      = '';
+    public  $response_error_message      = 'Error:';
 
     private $__codeConn                  = null;
     private $__secretKey                 = null;
 
-    private $__group_multicategory       = false;
+    private $__group_multicategory       = true;
 
     public  $data_returned               = null;
     public  $response_api_version        = null;
