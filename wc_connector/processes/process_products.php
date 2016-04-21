@@ -1,7 +1,9 @@
 <?php
 
 require_once 'connections/connections.php';
+
 require_once 'decorator/custom_decorator.php';
+
 
 class Process_Products
 {
@@ -33,6 +35,7 @@ class Process_Products
 
         // Check if product already exists and either run a Create or Update
         $check_prod = $db->query('SELECT * FROM pim_wc_connection WHERE pim_id = ' . $pim_id . ' LIMIT 1');
+
         $row_count = $check_prod->rowCount();
         if ($row_count > 0) {
             $result = $check_prod->fetch(PDO::FETCH_ASSOC);
@@ -46,6 +49,7 @@ class Process_Products
 
             if (isset($pim_img_ids)) {
                 $all_wc_images = $return_data['product']['images'];
+
                 $wc_img_id_array = array();
                 foreach ($all_wc_images as $wc_image) {
                     array_push($wc_img_id_array, $wc_image['id']);
@@ -56,6 +60,7 @@ class Process_Products
             // Add to the database
             if (isset($wc_img_ids)) {
                 $update_product = $db->prepare('UPDATE pim_wc_connection SET pim_img_ids=?, wc_img_ids=? WHERE pim_id=?');
+
                 $update_product->execute(array($pim_img_ids, $wc_img_ids, $pim_id));
             }
 
@@ -74,6 +79,7 @@ class Process_Products
 
             // Create in Woocommerce
             $return_data = $wc->post('products', $individual_formatted_product);
+
             $wc_id = $return_data['product']['id'];
             $individual_formatted_product['product']['id'] = $wc_id;
 
@@ -114,7 +120,7 @@ class Process_Products
         foreach ($all_formatted_products as $key => $formatted_product) {
 
             $wc_id = $formatted_product['product']['id'];
-
+            
             $get_pim_id = $db->query('SELECT * FROM pim_wc_connection WHERE wc_id = ' . $wc_id . ' LIMIT 1');
             $result = $get_pim_id->fetch(PDO::FETCH_ASSOC);
 
@@ -124,7 +130,7 @@ class Process_Products
             if ($pim_id == $individual_format['products_id']) {
 
                 $key_to_change = $key;
-
+                
                 $get_wc_var_id = $db->query('SELECT * FROM pim_wc_connection WHERE pim_var_id = ' . $pim_var_id . ' LIMIT 1');
                 $result = $get_wc_var_id->fetch(PDO::FETCH_ASSOC);
                 if (count($result) > 0) {
@@ -133,7 +139,7 @@ class Process_Products
 
                 $prod_pim_id = $pim_id;
                 $prod_wc_id = $wc_id;
-
+                
                 if (isset($formatted_product['product']['variations']) && !empty($formatted_product['product']['variations'])) {
                     $format_count = count($formatted_product['product']['variations']);
                 } else {
@@ -146,6 +152,7 @@ class Process_Products
 
         // As with products, we want to check that the sku for the format we're creating hasn't been left in wp_postmeta - but only if this is a new format
         $check_pim_var = $db->query('SELECT * FROM pim_wc_connection WHERE pim_var_id = ' . $pim_var_id);
+
         $row_count = $check_pim_var->rowCount();
         if ($row_count == 0) {
 
@@ -220,6 +227,7 @@ class Process_Products
         $wc = $this->connection->get_wc_connection();
         $db = $this->connection->get_db_connection();
 
+        
         // Set the type of id to search for
         if ($delete_type == 'product') {
             $id_type = 'pim_id';
@@ -229,6 +237,7 @@ class Process_Products
 
         // Search for the WC version of the id depending on above, and put it into the wc_id variable
         $delete_id = $db->query('SELECT * FROM pim_wc_connection WHERE ' . $id_type . ' = ' . $deleted_id . ' LIMIT 1');
+
         $result = $delete_id->fetch(PDO::FETCH_ASSOC);
         if ($delete_type == 'product') {
             $wc_id = $result['wc_id'];

@@ -14,7 +14,6 @@ class Pim_Wc_Process
         $this->connection->pim_conns();
         $this->connection->wc_connect();
         $this->connection->db_connect();
-
     }
 
     public function run_updater()
@@ -67,6 +66,7 @@ class Pim_Wc_Process
 
                         }
 
+                        //
                         // Modified products and formats
                         if ($stats['modified_product_ids_count'] > 0 || $stats['modified_format_ids_count'] > 0) {
 
@@ -96,7 +96,7 @@ class Pim_Wc_Process
                                     ++$i;
                                 }
                             }
-
+                            
                             // Loop through the formats, add them to their product and add all to Woocommerce
                             if (isset($modified_formats)) {
 
@@ -134,6 +134,7 @@ class Pim_Wc_Process
             "API version: <b>" . $pim->get_response_api_version() . "</b><br />\n" .
             "Action: <b>" . $pim->get_response_action() . "</b><br />\n" .
             "Time: <b>" . $pim->get_response_time() . "</b> (GMT 0)<br /><br />\n";
+        
         if ($stats['modified_product_ids_count'] > 0) {
             echo 'Number of <strong>modified</strong> products: ' . $stats['modified_product_ids_count'];
             echo '<br/>';

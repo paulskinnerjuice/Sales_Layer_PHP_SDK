@@ -14,11 +14,11 @@ echo '</pre>';
 */
 
 // View specific product information
-
+/*
 echo '<pre>';
-var_dump($woocommerce->get('products/6504'));
+var_dump($woocommerce->get('products/xxxx'));
 echo '</pre>';
-
+*/
 
 // View a count of all products
 /*
