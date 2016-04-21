@@ -44,7 +44,7 @@ class Services_Connection
     public function pim_conns()
     {
         $this->pim_conns = array(
-            'CN1133H4648C607' => '6919b2fd1b48ef9018ea1e1d272fed6b'
+            '__other_Sales_Layer_connector_code__' => '__other_Sales_Layer_secret__'
             //'__other_Sales_Layer_connector_code__'=>'__other_Sales_Layer_secret__'
         );
     }
@@ -53,9 +53,9 @@ class Services_Connection
     {
         // Instantiate the Woocommerce class
         // 'WEBSITE_URL', 'CONSUMER_KEY', 'CONSUMER_SECRET'
-        $this->wc_connection = new Client(  'http://dev/paul/mayfield-test/',
-                                    'ck_aa0ea0a3a409e8e5afdf433e1b85273d9417bb9e',
-                                    'cs_b6d19ff8becaabdad45758bc4da85d277ea605b5');
+        $this->wc_connection = new Client(  'WEBSITE_URL',
+                                    'CONSUMER_KEY',
+                                    'CONSUMER_SECRET');
     }
 
     public function db_connect()
