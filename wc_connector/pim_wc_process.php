@@ -166,7 +166,8 @@ class Pim_Wc_Process
         $db = $this->connection->get_db_connection();
 
         $attribute_skus = array();
-
+        
+        // Retrieve any current attributes for the product and add them to the above array
         $pim_id = $individual_product['id'];
         $get_wc_id = $db->query('SELECT * FROM pim_wc_connection WHERE pim_id = ' . $pim_id . ' LIMIT 1');
         $row_count = $get_wc_id->rowCount();
@@ -181,7 +182,8 @@ class Pim_Wc_Process
                 }
             }
         }
-
+        
+        // Get all skus from updated formats and add them to the above array only if they're not already in there
         foreach($modified_formats as $indiv_format) {
             if($indiv_format['products_id'] == $individual_product['id']) {
                 $format = str_replace(' ', '_', $indiv_format['data']['format_reference']);

@@ -1,7 +1,6 @@
 <?php
 
 require_once 'connections/connections.php';
-
 require_once 'decorator/custom_decorator.php';
 
 
