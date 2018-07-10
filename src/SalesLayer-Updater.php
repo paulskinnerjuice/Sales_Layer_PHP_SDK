@@ -1026,7 +1026,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     {
         if ($this->database_tables === null || $refresh === true) {
 
-            $tables = $this->DB->execute($this->SQL_list[]='SHOW TABLES');
+            $tables = $this->DB->execute($this->SQL_list[] = 'SHOW TABLES');
 
             $this->database_tables = array();
 
@@ -1191,7 +1191,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             if ($this->get_response_action() === 'refresh') {
 
-                $SQL = (count($this->get_connectors_list())==1 ?
+                $SQL = (count($this->get_connectors_list()) === 1 ?
 
                             "TRUNCATE `".   $this->table_prefix.$table."`;"
                             :
@@ -1213,7 +1213,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                     if ($info) {
 
                         $type = $this->__get_database_type_schema($info['type']);
-                        $mode = (  !isset($this->database_fields[$table][$field]) ?
+                        $mode = (!isset($this->database_fields[$table][$field]) ?
                                  'ADD' : ($this->database_fields[$table][$field]!=$type ? "CHANGE `$field` " : ''));
 
                         if ($mode) {
@@ -1227,7 +1227,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                     foreach (array_keys($this->database_fields[$table]) as $field) {
 
-                        if ($field != $table.'_id' && $field != '__conn_id__' && !isset($schema[$field])) {
+                        if ($field !== $table.'_id' && $field !== '__conn_id__' && !isset($schema[$field])) {
 
                             $fields .= ($fields ? ', ' : '')."DROP `$field`";
                         }
@@ -1368,7 +1368,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
             $ids        = array();
 
             foreach ($this->get_database_table_ids($table, true) as $v) {
-
                 $ids[$v['id']] = array($v['conn_id'], array_flip(explode(',', $v['conn_id'])));
             }
 
@@ -1414,7 +1413,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                                        "'";
 
                                         } else {
-
                                             $fields .= ($fields ? ', ' : '')."`{$fields_conn[$d_field]}` = '".  addslashes($value)."'";
                                         }
                                     }
@@ -1532,7 +1530,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
             $language      = $this->__test_language($language);
             $base_language = $this->get_default_language();
 
-            if ($force_default_language && $language==$base_language) { $force_default_language = false; }
+            if ($force_default_language && $language === $base_language) { $force_default_language = false; }
 
             $schema = $this->get_database_table_schema($table, false);
 
@@ -1542,7 +1540,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             } elseif (count($fields)) {
 
-                foreach ($fields as $k=>$v) { $fields[$k] = strtolower($v); }
+                foreach ($fields as $k => $v) { $fields[$k] = strtolower($v); }
             }
 
             $select          =
@@ -1551,7 +1549,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             if (is_array($schema) && count($schema)) {
 
-                foreach ($schema as $field=>$info) {
+                foreach ($schema as $field => $info) {
 
                     if ($fields === null || in_array($field, $fields)) {
 
@@ -1559,12 +1557,9 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                         $multi = ((isset($info['has_multilingual']) && $info['has_multilingual']) ? 1 : 0);
 
-                        if ($force_default_language && $multi && $language!=$base_language) {
-
+                        if ($force_default_language && $multi && $language !== $base_language) {
                             $select .= ", IF(`{$field}_$language`!='', `{$field}_$language`, `{$field}_$base_language`) as `$field`";
-
                         } else {
-
                             $select .= ", `$field".($multi ? "_$language` as `$field" : '').'`';
                         }
 
@@ -1600,7 +1595,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                             $clause = '';
 
-                            if  (isset($param['search']) && $param['search']) {
+                            if (isset($param['search']) && $param['search']) {
 
                                 $sfields = explode(',', $param['field']);
                                 $fgroup  = '';
@@ -1618,7 +1613,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                 }
 
                                 if ($fgroup) {
-                                    $clause = 'lower('.((count($sfields)>1) ? "concat($fgroup)" : $fgroup).") like '%".
+                                    $clause = 'lower('.((count($sfields) > 1) ? "concat($fgroup)" : $fgroup).") like '%".
                                               addslashes(strtolower($param['search']))."%'";
                                 }
 
@@ -1637,7 +1632,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                             }
 
                             if ($clause) {
-
                                 $where .= (($where && substr($where, -1)!='(') ? ' '.(($param['logic']) ? $param['logic'] : 'and').' ' : '').$clause;
                             }
                         }
@@ -1653,7 +1647,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                         if (isset($schema[$field])) {
 
                             if (!$db_field = $this->__get_real_field($field, $table, $language)) {
-                                $db_field     = $this->__get_real_field($field, $table, $base_language);
+                                $db_field = $this->__get_real_field($field, $table, $base_language);
                             }
 
                             if ($db_field) {
@@ -1701,7 +1695,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                                     if (in_array($schema[$field]['type'], array('image', 'file'))) {
                                         $res[$k][$field] = json_decode($value, true);
-                                    } elseif ($schema[$field]['type']=='list') {
+                                    } elseif ($schema[$field]['type'] === 'list') {
                                         $res[$k][$field] = explode(',', $value);
                                     }
                                 }
@@ -1775,7 +1769,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
         $this->__test_config_initialized();
 
-        if ($this->__get_config($code)!==null) {
+        if ($this->__get_config($code) !== null) {
 
             $SQL = "delete from `".$this->table_prefix.$this->table_config."` where `conn_code`='$code' limit 1;";
 
@@ -1806,7 +1800,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                         if (count($ids)) {
 
-                            foreach ($ids as $id=>$cons) {
+                            foreach ($ids as $id => $cons) {
 
                                 if (count($cons) > 1 && isset($cons[$conn_id])) {
 
@@ -1882,10 +1876,10 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     {
         if ($this->debbug !== false) {
 
-            $s = "\n\n[SLYR_Updater] List of SQL's:\n".print_r($this->SQL_list, 1)."\r\n";
+            $s = "\n\n[SLYR_Updater] List of SQL's:\n".print_r($this->SQL_list, true)."\r\n";
 
             if ($this->debbug === 'file') { file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'_log_updater_'.date('Y-m-d_H-i').'.txt', $s, FILE_APPEND); }
-            else                       { echo $s; }
+            else { echo $s; }
 
             $this->SQL_list = array();
 
