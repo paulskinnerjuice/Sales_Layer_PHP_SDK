@@ -166,13 +166,13 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     public function database_connect($database = null, $username = null, $password = null, $hostname = null)
     {
-        $this->__set_database_credentials ($database, $username, $password, $hostname);
+        $this->__set_database_credentials($database, $username, $password, $hostname);
 
         $this->DB = new slyr_SQL($this->database, $this->username, $this->password, $this->hostname);
 
-        if ($this->DB->error!=null) {
+        if ($this->DB->error !== null) {
 
-            $this->__trigger_error ($this->DB->error, 104);
+            $this->__trigger_error($this->DB->error, 104);
 
             return false;
         }
@@ -257,16 +257,16 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             if (!extension_loaded('pdo')) {
 
-                self::__trigger_error ('Missing PHP PDO extension', 103);
+                self::__trigger_error('Missing PHP PDO extension', 103);
 
             } else {
 
-                self::__trigger_error ('Missing PHP MySQL extension', 103);
+                self::__trigger_error('Missing PHP MySQL extension', 103);
             }
 
         } elseif (!extension_loaded('CURL')) {
 
-            self::__trigger_error ('Missing CURL extension', 106);
+            self::__trigger_error('Missing CURL extension', 106);
 
         } else {
 
@@ -353,16 +353,16 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     private function __update_config ($update_last_upd = true)
     {
-        if (!in_array($this->get_response_error(), array(103, 104)) && $code=addslashes($this->get_identification_code())) {
+        if (!in_array($this->get_response_error(), array(103, 104)) && $code = addslashes($this->get_identification_code())) {
 
-            if ($this->get_response_action() == 'refresh') {
+            if ($this->get_response_action() === 'refresh') {
 
                 $info   = $this->get_response_table_information();
                 $schema = array();
 
                 if (is_array($info) and count($info)) {
 
-                    foreach ($info as $table=>$data) {
+                    foreach ($info as $table => $data) {
 
                         if ($bd_table = $this->__verify_table_name($table)) {
 
@@ -372,7 +372,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                             $schema[$bd_table]['name'] = $table;
 
-                            foreach ($data['fields'] as $field=>$struc) {
+                            foreach ($data['fields'] as $field => $struc) {
 
                                 if ($field) {
 
@@ -383,20 +383,17 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                         if (!isset($schema[$bd_table][$db_field])) {
 
                                             $schema[$bd_table]['fields'][$db_field] = array(
-
                                                 'name'             => $struc['basename'],
                                                 'type'             => $struc['type'],
                                                 'has_multilingual' => 1
                                             );
 
-                                            if ($struc['type']=='image') {
-
+                                            if ($struc['type'] === 'image') {
                                                 $schema[$bd_table]['fields'][$db_field]['image_sizes'] = $struc['image_sizes'];
                                             }
                                         }
 
                                     } else {
-
                                         $db_field                                       = strtolower($field);
                                         $schema[$bd_table]['fields'][$db_field]         = $struc;
                                         $schema[$bd_table]['fields'][$db_field]['name'] = $field;
@@ -483,8 +480,8 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     public function set_identification ($codeConn, $secretKey = null)
     {
-        if (isset($this->database_config['conn_code']) && $codeConn!=$this->database_config['conn_code']) {
-            $this->database_config=array();
+        if (isset($this->database_config['conn_code']) && $codeConn != $this->database_config['conn_code']) {
+            $this->database_config = array();
         }
 
         parent::set_identification($codeConn, $secretKey);
@@ -501,9 +498,9 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     {
         if (!isset($this->list_connectors['names']) || !count($this->list_connectors['names'])) {
 
-            $this->list_connectors['names']=array();
+            $this->list_connectors['names'] = array();
 
-            $list = $this->DB->execute($this->SQL_list[]='select `conn_code` from `'.$this->table_prefix.$this->table_config.'`');
+            $list = $this->DB->execute($this->SQL_list[] = 'select `conn_code` from `'.$this->table_prefix.$this->table_config.'`');
 
             if (count($list)) {
 
@@ -529,7 +526,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
      *
      */
 
-    public function get_connectors_info($code=null, $refresh_info = false)
+    public function get_connectors_info($code = null, $refresh_info = false)
     {
         if ($refresh_info) { unset($this->list_connectors['data']); }
 
@@ -548,7 +545,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                     foreach ($v as &$w) {
                         if (substr($w, 0, 1) === '{') {
-                            $w = json_decode($w, 1);
+                            $w = json_decode($w, true);
                         }
                     }
                     unset($w);
@@ -588,7 +585,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
         if ($res = $this->DB->execute($this->SQL_list[] = $SQL)) {
 
-            return json_decode($res[0]['conn_extra'], 1);
+            return json_decode($res[0]['conn_extra'], true);
         }
 
         $this->__trigger_error($this->DB->error." ($SQL)", 104);
@@ -611,7 +608,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
         if (is_array($data)) {
 
             if (!$refresh) {
-
                 $now  = $this->get_connector_extra_info($code);
                 $data = array_merge((array)$now, $data);
             }
@@ -667,7 +663,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                 if ($refresh || !count($this->database_config) || $this->database_config['conn_code'] !== $code) {
 
-                    $data = $this->DB->execute($this->SQL_list[]='select * from `'.$this->table_prefix.$this->table_config."` where `conn_code`='$code' limit 1");
+                    $data = $this->DB->execute($this->SQL_list[] = 'select * from `'.$this->table_prefix.$this->table_config."` where `conn_code`='$code' limit 1");
 
                     if (count($data)) {
 
@@ -679,8 +675,8 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                             'last_update'      =>              $data['0']['last_update'],
                             'default_language' =>              $data['0']['default_language'],
                             'languages'        => explode(',', $data['0']['languages']),
-                            'conn_schema'      => json_decode( $data['0']['conn_schema'], 1),
-                            'data_schema'      => json_decode( $data['0']['data_schema'], 1)
+                            'conn_schema'      => json_decode( $data['0']['conn_schema'], true),
+                            'data_schema'      => json_decode( $data['0']['data_schema'], true)
                         );
 
                         if (!$config['last_update']) { $config['last_update'] = null; }
@@ -726,12 +722,10 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     private function __test_language($language)
     {
         if (is_array($language)) {
-
             $language = reset($language);
         }
 
         if (!$language or !in_array($language, $this->get_languages())) {
-
             $language = $this->get_default_language();
         }
 
@@ -746,7 +740,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     private function __get_mysql_version()
     {
-        if ($this->mysql_version == null) {
+        if ($this->mysql_version === null) {
 
             $SQL = 'SHOW VARIABLES LIKE "%version%"';
 
@@ -789,7 +783,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     {
         $ver = $this->__get_mysql_version();
 
-        return (($ver===null || $ver<5.0503 || $this->charset!='utf8') ? $this->charset.' COLLATE '.$this->charset.'_general_ci'
+        return (($ver === null || $ver < 5.0503 || $this->charset!='utf8') ? $this->charset.' COLLATE '.$this->charset.'_general_ci'
                                                                          :
                                                                          'utf8mb4 COLLATE utf8mb4_unicode_ci');
     }
@@ -813,7 +807,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
      *
      */
 
-    public function get_database_table_name ($table)
+    public function get_database_table_name($table)
     {
         $this->__test_config_initialized();
 
@@ -846,7 +840,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                  foreach ($this->database_config['data_schema'][$table]['table_joins'] as $field_id=>$table_rel) {
 
                      $join_fields[strtolower($field_id)] = array(
-
                         'type'  => 'key',
                         'table' => $table_rel,
                         'name'  => $field_id
@@ -855,15 +848,13 @@ class SalesLayer_Updater extends SalesLayer_Conn {
             }
 
             if ($extended !== true) {
-
                 $fields = array_merge($join_fields, $this->database_config['data_schema'][$table]['fields']);
-
             } else {
 
                 $fields    = array();
                 $languages = $this->get_languages();
 
-                foreach ($this->database_config['data_schema'][$table]['fields'] as $field=>$info) {
+                foreach ($this->database_config['data_schema'][$table]['fields'] as $field => $info) {
 
                     if (isset($info['has_multilingual']) && $info['has_multilingual']) {
 
@@ -918,7 +909,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
         if ($code = $this->get_identification_code()) {
 
             $this->test_update_stats = array(
-
                 'update' => 0,
                 'tables' => array()
             );
@@ -926,7 +916,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
             $this->__test_config_initialized($code);
 
             if ($force_refresh==true || (isset($this->database_config['conn_code']) && $this->get_identification_code()!=$this->database_config['conn_code'])) {
-
                 $this->database_config['last_update'] = null;
             }
 
@@ -943,7 +932,6 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                     $table = $this->__verify_table_name($table_name);
 
                     $this->test_update_stats['tables'][$this->table_prefix.$table] = array(
-
                         'name'     =>                                        $table_name,
                         'modified' => $this->get_response_table_modified_ids($table_name),
                         'deleted'  => $this->get_response_table_deleted_ids ($table_name)
@@ -977,17 +965,13 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             $this->__test_config_initialized($code);
 
-            if ($force_refresh==true || (isset($this->database_config['conn_code']) && $this->get_identification_code()!=$this->database_config['conn_code'])) {
-
+            if ($force_refresh === true || (isset($this->database_config['conn_code']) && $this->get_identification_code() != $this->database_config['conn_code'])) {
                 $this->database_config['last_update'] = null;
             }
 
             if (!isset($this->test_update_stats['update']) || !$this->test_update_stats['update']) {
-
                 $this->get_info($this->database_config['last_update'], $params, $connector_type);
-
             } else {
-
                 $this->test_update_stats = null;
             }
 
@@ -995,7 +979,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                 $this->__update_config(false);
 
-                if ($force_refresh==true) { $this->delete_all(false); }
+                if ($force_refresh === true) { $this->delete_all(false); }
 
                 $this->get_database_tables();
 
@@ -1006,19 +990,14 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                     $table = $this->__verify_table_name($table_name);
 
                     if (!in_array($this->table_prefix.$table, $this->database_tables)) {
-
                         $this->create_database_table($table_name);
-
                     } else {
-
                         $this->update_database_table($table_name);
                     }
                 }
 
                 if (count($this->get_response_table_modified_ids()) || count($this->get_response_table_deleted_ids())) {
-
                     foreach ($tables as $table) {
-
                         $this->update_database_table_data($table);
                     }
                 }
@@ -1045,11 +1024,11 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     public function get_database_tables($refresh = false)
     {
-        if ($this->database_tables === null || $refresh == true) {
+        if ($this->database_tables === null || $refresh === true) {
 
             $tables = $this->DB->execute($this->SQL_list[]='SHOW TABLES');
 
-            $this->database_tables=array();
+            $this->database_tables = array();
 
             if (is_array($tables) && count($tables)) {
 
@@ -1071,14 +1050,13 @@ class SalesLayer_Updater extends SalesLayer_Conn {
     {
         $table = $this->__verify_table_name($table);
 
-        if (!isset($this->database_fields[$table]) || $refresh==true) {
+        if (!isset($this->database_fields[$table]) || $refresh === true) {
 
-            $this->database_fields[$table]=array();
+            $this->database_fields[$table] = array();
 
             $data = $this->DB->execute($this->SQL_list[] = 'SHOW COLUMNS FROM `'.$this->table_prefix.$table.'`');
 
             if (is_array($data) && count($data)) {
-
                 foreach ($data as $v) { $this->database_fields[$table][$v['Field']] = preg_replace('/^([^\s\(]+).*$/', '\\1', $v['Type']); }
             }
         }
@@ -1098,7 +1076,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
         $time = (isset($this->database_config['last_update']) ? $this->database_config['last_update'] : null);
 
-        return  ((isset($time) and $mode=='datetime') ? date('Y-m-d H:i:s', $time) : $time);
+        return  ((isset($time) and $mode === 'datetime') ? date('Y-m-d H:i:s', $time) : $time);
     }
 
     /**
@@ -1161,7 +1139,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                 $fields = "`{$table}_id` int not null auto_increment primary key, `__conn_id__` varchar(512) NOT NULL";
 
-                foreach ($schema as $field=>$info) {
+                foreach ($schema as $field => $info) {
 
                     $field   = strtolower($field);
                     $type    = $this->__get_database_type_schema($info['type']);
@@ -1211,7 +1189,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
         if (in_array($this->table_prefix.$table, $this->database_tables)) {
 
-            if ($this->get_response_action()=='refresh') {
+            if ($this->get_response_action() === 'refresh') {
 
                 $SQL = (count($this->get_connectors_list())==1 ?
 
@@ -1230,7 +1208,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
                 $fields = '';
 
-                foreach ($schema as $field=>$info) {
+                foreach ($schema as $field => $info) {
 
                     if ($info) {
 
@@ -1239,18 +1217,17 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                  'ADD' : ($this->database_fields[$table][$field]!=$type ? "CHANGE `$field` " : ''));
 
                         if ($mode) {
-
                             $fields .= ($fields ? ', ' : '')."$mode `$field` $type ".($type=='bigint' ? ' UNSIGNED' : '').
                                        $this->database_field_types_charset[$type];
                         }
                     }
                 }
 
-                if (count($this->get_connectors_list())==1) {
+                if (count($this->get_connectors_list()) === 1) {
 
                     foreach (array_keys($this->database_fields[$table]) as $field) {
 
-                        if ($field!=$table.'_id' && $field!='__conn_id__' && !isset($schema[$field])) {
+                        if ($field != $table.'_id' && $field != '__conn_id__' && !isset($schema[$field])) {
 
                             $fields .= ($fields ? ', ' : '')."DROP `$field`";
                         }
@@ -1405,7 +1382,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                     $languages   = $this->get_languages();
                     $fields_conn = array();
 
-                    foreach ($schema as $field=>$info) {
+                    foreach ($schema as $field => $info) {
 
                         if (!empty($info['has_multilingual'])) {
 
@@ -1417,16 +1394,16 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                         }
                     }
 
-                    foreach ($data as $k=>&$register) {
+                    foreach ($data as $k => &$register) {
 
                        $id     = addslashes($register['id']);
                        $fields = '';
 
-                       foreach ($register as $field=>&$f_data) {
+                       foreach ($register as $field => &$f_data) {
 
                             if ($field=='data') {
 
-                                foreach ($f_data as $d_field=>&$value) {
+                                foreach ($f_data as $d_field => &$value) {
 
                                     if (isset($fields_conn[$d_field])) {
 
@@ -1485,9 +1462,9 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             if ($dids = $this->get_response_table_deleted_ids($table)) {
 
-                foreach ($dids as $k=>$id) {
+                foreach ($dids as $k => $id) {
 
-                    if (isset($ids[$id]) && count($ids[$id][1])>1 && isset($ids[$id][1][$conn_id])) {
+                    if (isset($ids[$id]) && count($ids[$id][1]) > 1 && isset($ids[$id][1][$conn_id])) {
 
                         unset($ids[$id][1][$conn_id]);
 
@@ -1723,7 +1700,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
                                 if (isset($schema[$field]['type'])) {
 
                                     if (in_array($schema[$field]['type'], array('image', 'file'))) {
-                                        $res[$k][$field] = json_decode($value, 1);
+                                        $res[$k][$field] = json_decode($value, true);
                                     } elseif ($schema[$field]['type']=='list') {
                                         $res[$k][$field] = explode(',', $value);
                                     }
@@ -1758,7 +1735,7 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
             if (count($tables)) {
 
-                if ($delete_config == true) { $tables[] = $this->table_config; }
+                if ($delete_config === true) { $tables[] = $this->table_config; }
 
                 foreach ($tables as $table) {
 
@@ -1903,11 +1880,11 @@ class SalesLayer_Updater extends SalesLayer_Conn {
 
     public function print_debbug()
     {
-        if ($this->debbug!==false) {
+        if ($this->debbug !== false) {
 
             $s = "\n\n[SLYR_Updater] List of SQL's:\n".print_r($this->SQL_list, 1)."\r\n";
 
-            if ($this->debbug=='file') { file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'_log_updater_'.date('Y-m-d_H-i').'.txt', $s, FILE_APPEND); }
+            if ($this->debbug === 'file') { file_put_contents(dirname(__FILE__).DIRECTORY_SEPARATOR.'_log_updater_'.date('Y-m-d_H-i').'.txt', $s, FILE_APPEND); }
             else                       { echo $s; }
 
             $this->SQL_list = array();
